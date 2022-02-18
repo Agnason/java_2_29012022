@@ -3,23 +3,20 @@ package lesson06;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Server {
+public class Client {
     private static final int PORT = 8189;
+    private static final String ADDRESS = "localhost";
 
     public static void main(String[] args) {
         Socket socket = null;
-        Scanner console = new Scanner(System.in);
+        Scanner consoleClient = new Scanner(System.in);
 
         try {
-            ServerSocket serverSocket = new ServerSocket(PORT);
-            System.out.println("Сервер запущен");
-            socket = serverSocket.accept();
-            System.out.println("Клиент подключен: " + socket.getRemoteSocketAddress());
+            socket = new Socket(ADDRESS, PORT);
+            System.out.println("Подключен к серверу: " + socket.getRemoteSocketAddress());
 
             DataInputStream inputStream = new DataInputStream(socket.getInputStream());
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
@@ -27,7 +24,7 @@ public class Server {
             Thread threadReader = new Thread(() -> {
                 while (true) {
                     try {
-                        outputStream.writeUTF(console.nextLine());
+                        outputStream.writeUTF(consoleClient.nextLine());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -39,11 +36,11 @@ public class Server {
             while (true) {
                 String str = inputStream.readUTF();
                 if (str.equals("/end")) {
-                    System.out.println("Клиент отключился");
+                    System.out.println("Сервер закрыт");
                     outputStream.writeUTF("/end");
                     break;
-                }else {
-                    System.out.println("Client: " + str);
+                } else {
+                    System.out.println("Server: " + str);
                 }
             }
         } catch (IOException e) {
